@@ -201,4 +201,16 @@ def display_about():
     - [Pandas](https://pandas.pydata.org/) - Manipulation de données
     - [Plotly](https://plotly.com/) - Visualisations interactives
     - [PyDeck](https://deckgl.readthedocs.io/) - Cartographie interactive
-    """) 
+    """)
+
+def display_signature():
+    """Affiche la signature du développeur en bas de page"""
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style='text-align: center; padding: 20px; color: #666; font-size: 14px;'>
+            Développé avec 🧠 par <a href='https://www.linkedin.com/in/philippehaag/' target='_blank' style='color: #0066cc; text-decoration: none;'>Philippe Haag</a>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    ) 

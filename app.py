@@ -8,7 +8,8 @@ from data.loader import load_data_by_type, load_coords_cache, filter_data, prepr
 from visualization.map import display_map
 from visualization.ui import (
     setup_page, display_data_preview, download_button,
-    display_stats, display_filters, display_about, display_elu_type_selector
+    display_stats, display_filters, display_about, display_elu_type_selector,
+    display_signature
 )
 from visualization.advanced import display_advanced_visualizations
 
@@ -58,6 +59,9 @@ def main():
     
     with tab4:
         display_about()
+    
+    # Signature
+    display_signature()
 
 if __name__ == "__main__":
     main()
