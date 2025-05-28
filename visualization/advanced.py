@@ -16,13 +16,18 @@ def create_age_pyramid(df: pd.DataFrame) -> Optional[go.Figure]:
     if 'Age' not in df.columns or 'Code sexe' not in df.columns:
         return None
     
+    # Vérifier qu'il y a suffisamment de données
+    if df.empty or len(df) < 2:
+        return None
+    
     # Create age bins
     bins = list(range(20, 91, 10))  # [20, 30, 40, 50, 60, 70, 80, 90]
     labels = [f"{bins[i]}-{bins[i+1]-1}" for i in range(len(bins)-1)]  # Créer les labels dynamiquement
     
     # Add age group column
-    df['Age_Group'] = pd.cut(
-        df['Age'].astype(float),
+    df_copy = df.copy()  # Travailler sur une copie pour éviter les modifications
+    df_copy['Age_Group'] = pd.cut(
+        df_copy['Age'].astype(float),
         bins=bins,
         labels=labels,
         right=False,
@@ -30,11 +35,30 @@ def create_age_pyramid(df: pd.DataFrame) -> Optional[go.Figure]:
     )
     
     # Count by age group and gender
-    age_gender = df.groupby(['Age_Group', 'Code sexe']).size().reset_index(name='count')
+    age_gender = df_copy.groupby(['Age_Group', 'Code sexe']).size().reset_index(name='count')
+    
+    # Vérifier qu'il y a des données après le groupement
+    if age_gender.empty:
+        return None
     
     # Create separate dataframes for men and women
-    men = age_gender[age_gender['Code sexe'] == 'M'].set_index('Age_Group')['count']
-    women = age_gender[age_gender['Code sexe'] == 'F'].set_index('Age_Group')['count']
+    men_data = age_gender[age_gender['Code sexe'] == 'M']
+    women_data = age_gender[age_gender['Code sexe'] == 'F']
+    
+    # Si pas de données pour un genre, créer des séries vides
+    if men_data.empty:
+        men = pd.Series(dtype=int, name='count')
+    else:
+        men = men_data.set_index('Age_Group')['count']
+    
+    if women_data.empty:
+        women = pd.Series(dtype=int, name='count')
+    else:
+        women = women_data.set_index('Age_Group')['count']
+    
+    # Vérifier qu'il y a au moins des données pour un genre
+    if men.empty and women.empty:
+        return None
     
     # Negate men counts for the pyramid
     men = -men
@@ -42,28 +66,53 @@ def create_age_pyramid(df: pd.DataFrame) -> Optional[go.Figure]:
     # Create the figure
     fig = go.Figure()
     
-    # Add men bars
-    fig.add_trace(go.Bar(
-        y=men.index,
-        x=men.values,
-        name='Hommes',
-        orientation='h',
-        marker=dict(color='rgba(0, 128, 255, 0.8)')
-    ))
+    # Add men bars (seulement s'il y a des données)
+    if not men.empty:
+        fig.add_trace(go.Bar(
+            y=men.index,
+            x=men.values,
+            name='Hommes',
+            orientation='h',
+            marker=dict(color='rgba(0, 128, 255, 0.8)')
+        ))
     
-    # Add women bars
-    fig.add_trace(go.Bar(
-        y=women.index,
-        x=women.values,
-        name='Femmes',
-        orientation='h',
-        marker=dict(color='rgba(255, 0, 128, 0.8)')
-    ))
+    # Add women bars (seulement s'il y a des données)
+    if not women.empty:
+        fig.add_trace(go.Bar(
+            y=women.index,
+            x=women.values,
+            name='Femmes',
+            orientation='h',
+            marker=dict(color='rgba(255, 0, 128, 0.8)')
+        ))
     
-    # Calculer les valeurs maximales pour les ticks
-    max_value = max(abs(men.min()), women.max())
-    tick_step = 20000  # Pas de 20 000 pour les ticks
-    max_tick = ((max_value // tick_step) + 1) * tick_step  # Arrondir au multiple de tick_step supérieur
+    # Calculer les valeurs maximales pour les ticks avec gestion des cas limites
+    max_values = []
+    if not men.empty and len(men) > 0:
+        max_values.append(abs(men.min()))
+    if not women.empty and len(women) > 0:
+        max_values.append(women.max())
+    
+    if not max_values:
+        return None
+    
+    max_value = max(max_values)
+    
+    # Gérer le cas où max_value est NaN ou 0
+    if pd.isna(max_value) or max_value == 0:
+        max_value = 100  # Valeur par défaut
+    
+    tick_step = max(1, int(max_value / 5))  # Adapter le pas selon la taille des données
+    if tick_step < 10:
+        tick_step = 10
+    elif tick_step < 100:
+        tick_step = 50
+    elif tick_step < 1000:
+        tick_step = 100
+    else:
+        tick_step = 1000
+    
+    max_tick = int(((max_value // tick_step) + 1) * tick_step)  # Convertir explicitement en entier
     
     # Créer les ticks
     tick_values = list(range(-max_tick, max_tick + tick_step, tick_step))
