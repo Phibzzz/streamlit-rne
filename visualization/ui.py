@@ -4,7 +4,7 @@ Module pour les composants de l'interface utilisateur
 
 import streamlit as st
 import pandas as pd
-from config.settings import APP_TITLE, APP_DESCRIPTION, APP_ICON, APP_LAYOUT, APP_INITIAL_SIDEBAR_STATE
+from config.settings import APP_TITLE, APP_DESCRIPTION, APP_ICON, APP_LAYOUT, APP_INITIAL_SIDEBAR_STATE, ELUS_CONFIG, DEFAULT_ELU_TYPE
 
 def setup_page(title: str = APP_TITLE, description: str = APP_DESCRIPTION):
     """Configure la page Streamlit"""
@@ -14,6 +14,38 @@ def setup_page(title: str = APP_TITLE, description: str = APP_DESCRIPTION):
         layout=APP_LAYOUT,
         initial_sidebar_state=APP_INITIAL_SIDEBAR_STATE
     )
+
+def display_elu_type_selector() -> str:
+    """
+    Affiche un sélecteur élégant pour choisir le type d'élu
+    Retourne le type d'élu sélectionné
+    """
+    st.markdown("### 🗳️ Choisissez le type d'élu à explorer")
+    
+    # Créer des colonnes pour un affichage élégant
+    cols = st.columns(3)
+    
+    # Organiser les options en groupes
+    options_display = []
+    for key, config in ELUS_CONFIG.items():
+        option_text = f"{config['icon']} **{config['name']}**\n\n*{config['description']}*"
+        options_display.append((key, option_text, config['name']))
+    
+    # Utiliser un selectbox avec des options formatées
+    selected_key = st.selectbox(
+        "Type d'élu",
+        options=[opt[0] for opt in options_display],
+        format_func=lambda x: next(opt[2] for opt in options_display if opt[0] == x),
+        index=list(ELUS_CONFIG.keys()).index(DEFAULT_ELU_TYPE),
+        help="Sélectionnez le type d'élu que vous souhaitez explorer"
+    )
+    
+    # Afficher les détails de la sélection
+    if selected_key in ELUS_CONFIG:
+        config = ELUS_CONFIG[selected_key]
+        st.info(f"{config['icon']} **{config['name']}** - {config['description']} (Niveau: {config['level']})")
+    
+    return selected_key
 
 def display_data_preview(df: pd.DataFrame, colonnes: list):
     """Affiche un aperçu des données"""
@@ -46,21 +78,32 @@ def display_stats(df: pd.DataFrame):
         st.sidebar.metric("Pourcentage de femmes", f"{female_pct:.1f}%")
 
 def display_filters(df: pd.DataFrame):
-    """Affiche les filtres dans la barre latérale"""
+    """Affiche les filtres dans la barre latérale adaptés au type de données"""
     st.sidebar.header("Filtres")
     
-    # Filtre par département
+    # Filtre par département/section départementale (adaptatif)
     selected_departments = []
-    if 'Libellé du département' in df.columns:
-        departments = df['Libellé du département'].dropna().astype(str).unique()
+    dept_column = None
+    dept_label = "Départements"
+    
+    # Détecter la colonne département appropriée
+    if 'Libellé de la section départementale' in df.columns:
+        dept_column = 'Libellé de la section départementale'
+        dept_label = "Sections départementales"
+    elif 'Libellé du département' in df.columns:
+        dept_column = 'Libellé du département'
+        dept_label = "Départements"
+    
+    if dept_column:
+        departments = df[dept_column].dropna().astype(str).unique()
         all_departments = sorted(departments)
         selected_departments = st.sidebar.multiselect(
-            "Départements",
+            dept_label,
             options=all_departments,
             default=[]
         )
     
-    # Filtre par genre
+    # Filtre par genre (toujours présent)
     selected_gender = "Tous"
     if 'Code sexe' in df.columns:
         genders = df['Code sexe'].dropna().unique()
@@ -70,10 +113,70 @@ def display_filters(df: pd.DataFrame):
             options=gender_options
         )
     
-    # Filtre de recherche
-    search_term = st.sidebar.text_input("Rechercher un élu ou une commune")
+    # Filtre par commune (si disponible)
+    selected_communes = []
+    if 'Libellé de la commune' in df.columns:
+        communes = df['Libellé de la commune'].dropna().astype(str).unique()
+        if len(communes) > 0:
+            selected_communes = st.sidebar.multiselect(
+                "Communes",
+                options=sorted(communes),
+                default=[],
+                help="Filtrer par commune (optionnel)"
+            )
     
-    return selected_departments, selected_gender, search_term
+    # Filtre par canton (si disponible - pour les conseillers départementaux)
+    selected_cantons = []
+    if 'Libellé du canton' in df.columns:
+        cantons = df['Libellé du canton'].dropna().astype(str).unique()
+        if len(cantons) > 0:
+            selected_cantons = st.sidebar.multiselect(
+                "Cantons",
+                options=sorted(cantons),
+                default=[],
+                help="Filtrer par canton (optionnel)"
+            )
+    
+    # Filtre par région (si disponible - pour les conseillers régionaux)
+    selected_regions = []
+    if 'Libellé de la région' in df.columns:
+        regions = df['Libellé de la région'].dropna().astype(str).unique()
+        if len(regions) > 0:
+            selected_regions = st.sidebar.multiselect(
+                "Régions",
+                options=sorted(regions),
+                default=[],
+                help="Filtrer par région (optionnel)"
+            )
+    
+    # Filtre par fonction (si disponible)
+    selected_functions = []
+    if 'Libellé de la fonction' in df.columns:
+        functions = df['Libellé de la fonction'].dropna().astype(str).unique()
+        if len(functions) > 0 and functions[0] != '':
+            selected_functions = st.sidebar.multiselect(
+                "Fonctions",
+                options=sorted(functions),
+                default=[],
+                help="Filtrer par fonction (optionnel)"
+            )
+    
+    # Filtre de recherche textuelle
+    search_term = st.sidebar.text_input(
+        "Rechercher un élu, une commune ou un canton",
+        help="Recherche dans les noms, prénoms, communes et cantons"
+    )
+    
+    return {
+        'departments': selected_departments,
+        'dept_column': dept_column,  # Ajouter la colonne utilisée pour le filtrage
+        'gender': selected_gender,
+        'communes': selected_communes,
+        'cantons': selected_cantons,
+        'regions': selected_regions,
+        'functions': selected_functions,
+        'search_term': search_term
+    }
 
 def display_about():
     """Affiche la section À propos"""

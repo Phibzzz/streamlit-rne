@@ -4,11 +4,11 @@ Application principale Streamlit pour l'exploration du RNE
 
 import streamlit as st
 from config.settings import APP_TITLE, APP_DESCRIPTION
-from data.loader import load_data, load_coords_cache, filter_data, preprocess_data
+from data.loader import load_data_by_type, load_coords_cache, filter_data, preprocess_data
 from visualization.map import display_map
 from visualization.ui import (
     setup_page, display_data_preview, download_button,
-    display_stats, display_filters, display_about
+    display_stats, display_filters, display_about, display_elu_type_selector
 )
 from visualization.advanced import display_advanced_visualizations
 
@@ -18,9 +18,12 @@ def main():
     st.title(APP_TITLE)
     st.markdown(APP_DESCRIPTION)
     
-    # Chargement des données
+    # Sélecteur de type d'élu
+    selected_elu_type = display_elu_type_selector()
+    
+    # Chargement des données selon le type sélectionné
     with st.spinner("Chargement des données..."):
-        df = load_data()
+        df = load_data_by_type(selected_elu_type)
         commune_cache = load_coords_cache("commune_coords_cache.json")
         dept_cache = load_coords_cache("dept_coords_cache.json")
         
@@ -32,8 +35,8 @@ def main():
         return
     
     # Afficher les filtres et appliquer la sélection
-    selected_departments, selected_gender, search_term = display_filters(df)
-    filtered_df = filter_data(df, selected_departments, selected_gender, search_term)
+    filters = display_filters(df)
+    filtered_df = filter_data(df, filters)
     
     # Afficher les statistiques
     display_stats(filtered_df)

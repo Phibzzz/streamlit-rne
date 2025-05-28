@@ -148,9 +148,22 @@ def plot_gender_distribution(df: pd.DataFrame):
 
 def plot_mayors_by_department(df: pd.DataFrame):
     """
-    Crée un graphique en barres du nombre d'élus par département
+    Crée un graphique en barres du nombre d'élus par département/section départementale
     """
-    dept_col = 'Libellé du département' if 'Libellé du département' in df.columns else None
+    # Détecter la colonne appropriée
+    dept_col = None
+    title_text = "Nombre d'élus par Département (Top 20)"
+    x_label = "Département"
+    
+    if 'Libellé de la section départementale' in df.columns:
+        dept_col = 'Libellé de la section départementale'
+        title_text = "Nombre d'élus par Section départementale (Top 20)"
+        x_label = "Section départementale"
+    elif 'Libellé du département' in df.columns:
+        dept_col = 'Libellé du département'
+        title_text = "Nombre d'élus par Département (Top 20)"
+        x_label = "Département"
+    
     if not dept_col:
         return None
     
@@ -158,8 +171,8 @@ def plot_mayors_by_department(df: pd.DataFrame):
     fig = px.bar(
         x=dept_counts.index,
         y=dept_counts.values,
-        title="Nombre d'élus par Département (Top 20)",
-        labels={'x': 'Département', 'y': "Nombre d'élus"},
+        title=title_text,
+        labels={'x': x_label, 'y': "Nombre d'élus"},
         color=dept_counts.values,
         color_continuous_scale=px.colors.sequential.Viridis
     )

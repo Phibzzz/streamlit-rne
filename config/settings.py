@@ -9,8 +9,57 @@ APP_ICON = "🗳️"
 APP_LAYOUT = "wide"
 APP_INITIAL_SIDEBAR_STATE = "expanded"
 
-# URL des données
-DATA_URL = "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164444/elus-conseillers-municipaux-cm.csv"
+# Configuration des différents types d'élus
+ELUS_CONFIG = {
+    "conseillers_municipaux": {
+        "name": "Conseillers municipaux",
+        "icon": "🏛️",
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164444/elus-conseillers-municipaux-cm.csv",
+        "description": "Élus des conseils municipaux des communes françaises",
+        "level": "Commune"
+    },
+    "conseillers_departementaux": {
+        "name": "Conseillers départementaux", 
+        "icon": "🏢",
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164544/elus-conseillers-departementaux-cd.csv",
+        "description": "Élus des conseils départementaux",
+        "level": "Département"
+    },
+    "conseillers_regionaux": {
+        "name": "Conseillers régionaux",
+        "icon": "🌍", 
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164557/elus-conseillers-regionaux-cr.csv",
+        "description": "Élus des conseils régionaux",
+        "level": "Région"
+    },
+    "maires": {
+        "name": "Maires",
+        "icon": "👨‍💼",
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164715/elus-maires-mai.csv", 
+        "description": "Maires des communes françaises",
+        "level": "Commune"
+    },
+    "deputes": {
+        "name": "Députés",
+        "icon": "🏛️",
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164704/elus-deputes-dep.csv",
+        "description": "Députés de l'Assemblée nationale",
+        "level": "National"
+    },
+    "senateurs": {
+        "name": "Sénateurs", 
+        "icon": "🏛️",
+        "url": "https://static.data.gouv.fr/resources/repertoire-national-des-elus-1/20250312-164637/elus-senateurs-sen.csv",
+        "description": "Sénateurs du Sénat",
+        "level": "National"
+    }
+}
+
+# Type d'élu par défaut
+DEFAULT_ELU_TYPE = "conseillers_municipaux"
+
+# URL des données (pour compatibilité - sera remplacée dynamiquement)
+DATA_URL = ELUS_CONFIG[DEFAULT_ELU_TYPE]["url"]
 
 # Chemins des fichiers de cache
 DEPT_COORDS_CACHE = "dept_coords_cache.json"

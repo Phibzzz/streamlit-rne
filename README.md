@@ -1,81 +1,115 @@
-# Explorateur du Répertoire National des Élus (RNE)
+# Explorateur du Répertoire National des Élus
 
-Une application Streamlit pour explorer et visualiser les données du Répertoire National des Élus.
+Une application Streamlit interactive pour explorer et visualiser les données du Répertoire National des Élus (RNE) de France.
 
-## Fonctionnalités
+## 🚀 Nouvelles fonctionnalités
 
-- Visualisation des données des élus avec filtres
-- Carte interactive des élus par département et commune
-- Analyses avancées (pyramide des âges, statistiques, etc.)
-- Export des données filtrées
+### Types d'élus supportés
 
-## Installation
+L'application permet maintenant d'explorer **6 types d'élus différents** :
 
-1. Cloner le dépôt :
+- 🏛️ **Conseillers municipaux** (488k élus) - Élus des conseils municipaux
+- 🏢 **Conseillers départementaux** (4k élus) - Élus des conseils départementaux  
+- 🌍 **Conseillers régionaux** - Élus des conseils régionaux
+- 👨‍💼 **Maires** (35k élus) - Maires des communes françaises
+- 🏛️ **Députés** - Députés de l'Assemblée nationale
+- 🏛️ **Sénateurs** - Sénateurs du Sénat
+
+### Sélecteur intelligent
+
+- **Interface élégante** : Sélecteur avec icônes et descriptions pour chaque type d'élu
+- **Chargement dynamique** : Les données se chargent automatiquement selon le type sélectionné
+- **Filtres adaptatifs** : Les filtres s'ajustent selon les colonnes disponibles pour chaque type
+
+## ✨ Fonctionnalités
+
+### Filtrage intelligent
+- **Départements** : Filtrage par département (disponible pour tous les types)
+- **Genre** : Répartition homme/femme (disponible pour tous les types)
+- **Communes** : Filtrage par commune (conseillers municipaux, maires)
+- **Cantons** : Filtrage par canton (conseillers départementaux)
+- **Fonctions** : Filtrage par fonction spécifique (selon disponibilité)
+- **Recherche textuelle** : Recherche dans noms, prénoms, communes, cantons
+
+### Visualisations
+- **Carte interactive** : Localisation géographique des élus avec PyDeck
+- **Graphiques de répartition** : Analyse par genre, département, etc.
+- **Statistiques en temps réel** : Métriques dynamiques selon les filtres
+- **Tableau interactif** : Exploration détaillée des données
+
+### Interface utilisateur
+- **Design moderne** : Interface claire et intuitive
+- **Responsive** : Adaptation automatique à différentes tailles d'écran
+- **Performance optimisée** : Mise en cache des données pour une navigation fluide
+
+## 🛠️ Installation
+
+1. Clonez le repository :
 ```bash
-git clone <votre-repo>
-cd <votre-repo>
+git clone <repository-url>
+cd streamlit-rne-explorer
 ```
 
-2. Créer un environnement virtuel :
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# ou
-.venv\Scripts\activate     # Windows
-```
-
-3. Installer les dépendances :
+2. Installez les dépendances :
 ```bash
 pip install -r requirements.txt
 ```
 
-## Utilisation
-
-1. Lancer l'application :
+3. Lancez l'application :
 ```bash
 streamlit run app.py
 ```
 
-2. Ouvrir votre navigateur à l'adresse : http://localhost:8501
+## 📊 Sources de données
 
-## Structure du Projet
+Les données proviennent du site officiel [data.gouv.fr](https://www.data.gouv.fr/fr/datasets/repertoire-national-des-elus-1/) :
+
+- **Conseillers municipaux** : ~488k enregistrements
+- **Conseillers départementaux** : ~4k enregistrements  
+- **Maires** : ~35k enregistrements
+- **Conseillers régionaux** : Données régionales
+- **Députés** : Assemblée nationale
+- **Sénateurs** : Sénat
+
+## 🏗️ Architecture
 
 ```
-.
-├── app.py                  # Point d'entrée de l'application
-├── config/                 # Configuration de l'application
-│   ├── __init__.py
-│   └── settings.py        # Paramètres globaux
-├── data/                   # Gestion des données
-│   ├── __init__.py
-│   └── loader.py          # Chargement et prétraitement
-├── utils/                  # Utilitaires
-│   ├── __init__.py
-│   └── helpers.py         # Fonctions auxiliaires
-├── visualization/          # Composants de visualisation
-│   ├── __init__.py
-│   ├── advanced.py        # Visualisations avancées
-│   ├── map.py            # Carte interactive
-│   └── ui.py             # Interface utilisateur
-├── requirements.txt       # Dépendances Python
-└── README.md             # Documentation
+├── app.py                 # Application principale
+├── config/
+│   └── settings.py       # Configuration des types d'élus et URLs
+├── data/
+│   └── loader.py         # Chargement et filtrage des données
+├── visualization/
+│   ├── ui.py            # Composants d'interface utilisateur
+│   ├── map.py           # Carte interactive
+│   └── advanced.py      # Visualisations avancées
+└── utils/               # Utilitaires
 ```
 
-## Données
+## 🔧 Technologies utilisées
 
-Les données sont chargées directement depuis data.gouv.fr et mises en cache localement pour de meilleures performances.
+- **[Streamlit](https://streamlit.io/)** - Framework d'application web
+- **[Pandas](https://pandas.pydata.org/)** - Manipulation de données
+- **[Plotly](https://plotly.com/)** - Visualisations interactives
+- **[PyDeck](https://deckgl.readthedocs.io/)** - Cartographie 3D
+- **[Requests](https://requests.readthedocs.io/)** - Chargement de données
 
-## Cache
+## 📈 Améliorations futures
 
-L'application utilise deux fichiers de cache pour les coordonnées :
-- `dept_coords_cache.json` : Coordonnées des départements
-- `commune_coords_cache.json` : Coordonnées des communes
+- [ ] Ajout de visualisations temporelles (évolution des mandats)
+- [ ] Comparaisons inter-départementales avancées
+- [ ] Export de rapports personnalisés
+- [ ] Intégration d'analyses prédictives
+- [ ] Mode hors-ligne avec cache local
 
-## Contribution
+## 🤝 Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+Les contributions sont les bienvenues ! N'hésitez pas à :
+- Signaler des bugs
+- Proposer de nouvelles fonctionnalités
+- Améliorer la documentation
+- Optimiser les performances
 
-## Licence
+## 📄 Licence
 
-Ce projet est sous licence MIT.
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
